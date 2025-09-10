@@ -1,0 +1,2 @@
+After cloning repo, pull also the submodules (mexc proto files):
+git submodule update --init --recursive
