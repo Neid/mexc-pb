@@ -1,7 +1,7 @@
-use std::path::PathBuf;
+use std::{path::PathBuf, process::exit};
 use walkdir::WalkDir;
 
-fn main() {
+fn main(){
     let proto_root = PathBuf::from("proto");
     let out_dir = PathBuf::from("src/pb"); // custom destination
 
@@ -14,6 +14,10 @@ fn main() {
         .collect();
 
     // Configure prost-build to output into src/pb
+    if let Err(error) = std::fs::create_dir("src/pb") && error.kind() != std::io::ErrorKind::AlreadyExists {
+        eprintln!("Failed to create output directory: {:?}", error);
+        exit(1);
+    }
     let mut config = prost_build::Config::new();
     config.out_dir(out_dir);
     config.extern_path("._", "crate::websocket");
@@ -23,5 +27,8 @@ fn main() {
             &protos.iter().map(|p| p.as_path()).collect::<Vec<_>>(),
             &[proto_root], // include path
         )
-        .expect("Missing proto files, run: git submodule update --init --recursive");
+        .map_err(|e| {
+            eprintln!("Error compiling proto files: {:?}", e);
+            eprint!("Don't forget to run: git submodule update --init --recursive");
+        }).unwrap();
 }
