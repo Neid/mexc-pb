@@ -23,5 +23,5 @@ fn main() {
             &protos.iter().map(|p| p.as_path()).collect::<Vec<_>>(),
             &[proto_root], // include path
         )
-        .unwrap();
+        .expect("Missing proto files, run: git submodule update --init --recursive");
 }
